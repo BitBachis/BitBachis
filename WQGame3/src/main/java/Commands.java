@@ -34,6 +34,9 @@ Commands class
  */
 public class Commands {
 
+    public Commands() throws IOException {
+    }
+
     /*
      * Top-level command
      */
@@ -117,26 +120,29 @@ public class Commands {
             return null;
         }
     }
+
     /**
      * Command to login
      */
+
+
     @Command(name = "Login", mixinStandardHelpOptions = true,
             description = "Log in to WQ game",version = "1.0")
-    static class Login implem  ents Runnable {
-
-        @CommandLine.Parameters(index = "0")    String name;
-        @CommandLine.Parameters(index = "1")    String password;
+    static class Login implements Runnable {
 
         @ParentCommand CliCommands parent;
-        //??
-        LoginTCP log = new LoginTCP(null, null);
 
-        Login() throws IOException {
-        }
-        //log.run();
+        @CommandLine.Parameters(index = "0")    private String nickname;
+        @CommandLine.Parameters(index = "1")    private String password;
 
-        public void run()  {
-            System.out.println("Hello "+name+" "+password);
+        @Override
+        public void run() {
+            try {
+                LoginTCP log = new LoginTCP(nickname, password);
+                log.run();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
