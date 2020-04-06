@@ -22,8 +22,12 @@ import picocli.shell.jline3.PicocliCommands;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -48,7 +52,7 @@ public class Commands {
                     ""},
             footer = {"", "Press Ctl-D to exit."},
             subcommands = {
-                    MyCommand.class, Signup.class,Login.class,ClearScreen.class, CommandLine.HelpCommand.class})
+                    MyCommand.class, Signup.class,LoginTCP.class,ClearScreen.class, CommandLine.HelpCommand.class})
 
     static class CliCommands implements Runnable {
         LineReaderImpl reader;
@@ -122,47 +126,31 @@ public class Commands {
     }
 
     /**
-     * Command to login
-     */
-
-
-    @Command(name = "Login", mixinStandardHelpOptions = true,
-            description = "Log in to WQ game",version = "1.0")
-    static class Login implements Runnable {
-
-        @ParentCommand CliCommands parent;
-
-        @CommandLine.Parameters(index = "0")    private String nickname;
-        @CommandLine.Parameters(index = "1")    private String password;
-
-        @Override
-        public void run() {
-            try {
-                LoginTCP log = new LoginTCP(nickname, password);
-                log.run();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
      * Command to Sign up
      */
     // bug : string error unmatched arguments from index 0  sign up . it works with signup
     @Command(name = "Signup", mixinStandardHelpOptions = true,
             description = "Sign up to WQ game",version = "1.0")
-    static class Signup implements Runnable {
+    static class Signup implements Runnable{
 
-        @CommandLine.Parameters(index = "0")    String name;
-        @CommandLine.Parameters(index = "1")    String password;
+        @CommandLine.Parameters(index = "0")  String name;
+        @CommandLine.Parameters(index = "1")  String password;
 
-        @ParentCommand CliCommands parent;
+        @ParentCommand
+        CliCommands parent;
 
-        public void run()  {
-            System.out.println("Coungratulation "+name+" "+password+"! you have succecfully sign up to WORD QUIZZLE GAME. Login to play!");
-        }
+            public void run(){
+                WQRegistration reg = new WQRegistration();
+                try {
+                    reg.registration(name,password);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Congratulation " + name + " " + password + "! you have succecfully sign up to WORD QUIZZLE GAME. Login to play!");
+
+            }
     }
+
 /*
      * Provide command descriptions for JLine TailTipWidgets
      * to be displayed in the status bar.
