@@ -1,0 +1,4 @@
+message Login {
+    required string nickname = 1;
+    required string password = 2;
+}
